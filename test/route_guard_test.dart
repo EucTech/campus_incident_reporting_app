@@ -1,31 +1,39 @@
 import 'package:campus_incident_reporting_app/core/router/route_guard.dart';
-import 'package:campus_incident_reporting_app/features/auth/application/auth_providers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  String? guard(AuthStage stage, String location, {bool isStaff = false}) =>
-      guardRoute(stage: stage, location: location, isStaff: isStaff);
+  String? guard(SessionStage stage, String location, {bool isStaff = false, bool isAdmin = false}) =>
+      guardRoute(stage: stage, location: location, isStaff: isStaff, isAdmin: isAdmin);
 
   test('signed out users only reach public routes', () {
-    expect(guard(AuthStage.signedOut, '/home'), Routes.welcome);
-    expect(guard(AuthStage.signedOut, '/incident/1'), Routes.welcome);
-    expect(guard(AuthStage.signedOut, '/login'), isNull);
+    expect(guard(SessionStage.signedOut, '/home'), Routes.welcome);
+    expect(guard(SessionStage.signedOut, '/incident/1'), Routes.welcome);
+    expect(guard(SessionStage.signedOut, Routes.login), isNull);
+    expect(guard(SessionStage.signedOut, Routes.registerSchool), isNull);
   });
 
-  test('unverified users are held on the verification screen', () {
-    expect(guard(AuthStage.unverified, '/home'), Routes.verify);
-    expect(guard(AuthStage.unverified, '/report'), Routes.verify);
-    expect(guard(AuthStage.unverified, Routes.verify), isNull);
+  test('loading never shows a screen with half loaded data', () {
+    expect(guard(SessionStage.loading, '/home'), Routes.splash);
+    expect(guard(SessionStage.loading, Routes.splash), isNull);
   });
 
-  test('verified users skip the entry routes', () {
-    expect(guard(AuthStage.ready, '/login'), Routes.home);
-    expect(guard(AuthStage.ready, Routes.verify), Routes.home);
-    expect(guard(AuthStage.ready, '/reports'), isNull);
+  test('each onboarding step holds the user on its own screen', () {
+    expect(guard(SessionStage.unverified, '/home'), Routes.verify);
+    expect(guard(SessionStage.unverified, Routes.verify), isNull);
+    expect(guard(SessionStage.needsSchool, '/reports'), Routes.join);
+    expect(guard(SessionStage.needsSchool, Routes.join), isNull);
   });
 
-  test('only staff reach the desk', () {
-    expect(guard(AuthStage.ready, Routes.desk), Routes.home);
-    expect(guard(AuthStage.ready, Routes.desk, isStaff: true), isNull);
+  test('ready users skip entry and holding screens', () {
+    expect(guard(SessionStage.ready, Routes.login), Routes.home);
+    expect(guard(SessionStage.ready, Routes.join), Routes.home);
+    expect(guard(SessionStage.ready, '/reports'), isNull);
+  });
+
+  test('only staff reach the desk and only admins reach the team', () {
+    expect(guard(SessionStage.ready, Routes.desk), Routes.home);
+    expect(guard(SessionStage.ready, Routes.desk, isStaff: true), isNull);
+    expect(guard(SessionStage.ready, Routes.team, isStaff: true), Routes.home);
+    expect(guard(SessionStage.ready, Routes.team, isStaff: true, isAdmin: true), isNull);
   });
 }

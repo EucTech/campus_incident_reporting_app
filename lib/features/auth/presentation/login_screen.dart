@@ -44,7 +44,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final loading = ref.watch(authControllerProvider).isLoading;
     return AuthScaffold(
       title: 'Welcome\nback.',
-      subtitle: 'Log in with your ALU email.',
+      subtitle: 'Log in with your school email or the email you were invited with.',
       children: [
         Form(
           key: _formKey,
@@ -52,9 +52,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               children: [
                 LabeledField(
-                  label: 'ALU email',
+                  label: 'Email',
                   controller: _email,
-                  hint: 'you@alustudent.com',
+                  hint: 'you@school.com',
                   keyboardType: TextInputType.emailAddress,
                   autofillHints: const [AutofillHints.email],
                   validator: Validators.email,

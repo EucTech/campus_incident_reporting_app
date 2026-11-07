@@ -15,16 +15,23 @@ class IncidentRepository {
 
   static const _feedLimit = 300;
 
-  CollectionReference<Map<String, dynamic>> get _incidents => _db.collection('incidents');
+  CollectionReference<Map<String, dynamic>> _incidents(String schoolId) =>
+      _db.collection('schools').doc(schoolId).collection('incidents');
 
-  Stream<List<Incident>> watchAll() => _incidents
-      .orderBy('createdAt', descending: true)
-      .limit(_feedLimit)
-      .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) => Incident.fromMap(doc.id, doc.data())).toList());
+  Stream<List<Incident>> watchAll(String schoolId) =>
+      _incidents(schoolId)
+          .orderBy('createdAt', descending: true)
+          .limit(_feedLimit)
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map((doc) => Incident.fromMap(doc.id, doc.data())).toList());
 
-  Future<String> create({required IncidentDraft draft, required AppUser reporter, File? photo}) async {
-    final doc = _incidents.doc();
+  Future<String> create({
+    required String schoolId,
+    required IncidentDraft draft,
+    required AppUser reporter,
+    File? photo,
+  }) async {
+    final doc = _incidents(schoolId).doc();
     final image = photo == null ? null : await _uploader.upload(photo);
     final displayName = draft.anonymous ? null : reporter.name;
     await doc.set({
@@ -49,6 +56,7 @@ class IncidentRepository {
   }
 
   Future<void> update({
+    required String schoolId,
     required Incident incident,
     required IncidentDraft draft,
     File? photo,
@@ -56,7 +64,7 @@ class IncidentRepository {
   }) async {
     final replacesPhoto = photo != null || removePhoto;
     final image = photo == null ? null : await _uploader.upload(photo);
-    await _incidents.doc(incident.id).update({
+    await _incidents(schoolId).doc(incident.id).update({
       ...draft.toMap(),
       if (replacesPhoto) 'imageUrl': image?.url,
       if (replacesPhoto) 'imagePath': image?.id,
@@ -65,19 +73,25 @@ class IncidentRepository {
   }
 
   // Photos stay in Cloudinary because unsigned clients are not allowed to delete them.
-  Future<void> delete(Incident incident) => _incidents.doc(incident.id).delete();
+  Future<void> delete({required String schoolId, required Incident incident}) =>
+      _incidents(schoolId).doc(incident.id).delete();
 
-  Future<void> setAffected({required String incidentId, required String uid, required bool affected}) =>
-      _incidents.doc(incidentId).update({
-        'affectedBy': affected ? FieldValue.arrayUnion([uid]) : FieldValue.arrayRemove([uid]),
-      });
+  Future<void> setAffected({
+    required String schoolId,
+    required String incidentId,
+    required String uid,
+    required bool affected,
+  }) => _incidents(schoolId).doc(incidentId).update({
+    'affectedBy': affected ? FieldValue.arrayUnion([uid]) : FieldValue.arrayRemove([uid]),
+  });
 
   Future<void> changeStatus({
+    required String schoolId,
     required Incident incident,
     required IncidentStatus status,
     required String note,
     required String actorName,
-  }) => _incidents.doc(incident.id).update({
+  }) => _incidents(schoolId).doc(incident.id).update({
     'status': status.name,
     'timeline': FieldValue.arrayUnion([
       TimelineEntry(status: status, actorName: actorName, at: DateTime.now(), note: note.trim()).toMap(),

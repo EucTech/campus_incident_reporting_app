@@ -3,9 +3,12 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/router/route_guard.dart';
+import '../../../core/router/session_stage.dart';
 import '../../../core/services/image_uploader.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../auth/domain/app_user.dart';
+import '../../schools/application/school_providers.dart';
 import '../data/incident_repository.dart';
 import '../domain/incident.dart';
 import '../domain/incident_enums.dart';
@@ -16,8 +19,9 @@ final incidentRepositoryProvider = Provider<IncidentRepository>(
 );
 
 final incidentsProvider = StreamProvider<List<Incident>>((ref) {
-  if (ref.watch(authStageProvider) != AuthStage.ready) return Stream.value(const []);
-  return ref.watch(incidentRepositoryProvider).watchAll();
+  final schoolId = ref.watch(currentSchoolIdProvider);
+  if (schoolId == null || ref.watch(sessionStageProvider) != SessionStage.ready) return Stream.value(const []);
+  return ref.watch(incidentRepositoryProvider).watchAll(schoolId);
 });
 
 final incidentByIdProvider = Provider.family<AsyncValue<Incident?>, String>((ref, id) {
@@ -112,6 +116,8 @@ class IncidentController extends AsyncNotifier<void> {
     return profile;
   }
 
+  String get _schoolId => _requireProfile().schoolId!;
+
   Future<bool> _run(Future<void> Function() action) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(action);
@@ -121,20 +127,39 @@ class IncidentController extends AsyncNotifier<void> {
   Future<String?> submit(IncidentDraft draft, File? photo) async {
     String? id;
     final done = await _run(() async {
-      id = await _repository.create(draft: draft, reporter: _requireProfile(), photo: photo);
+      id = await _repository.create(schoolId: _schoolId, draft: draft, reporter: _requireProfile(), photo: photo);
     });
     return done ? id : null;
   }
 
-  Future<bool> edit(Incident incident, IncidentDraft draft, File? photo, {bool removePhoto = false}) =>
-      _run(() => _repository.update(incident: incident, draft: draft, photo: photo, removePhoto: removePhoto));
+  Future<bool> edit(Incident incident, IncidentDraft draft, File? photo, {bool removePhoto = false}) => _run(
+    () => _repository.update(
+      schoolId: _schoolId,
+      incident: incident,
+      draft: draft,
+      photo: photo,
+      removePhoto: removePhoto,
+    ),
+  );
 
-  Future<bool> remove(Incident incident) => _run(() => _repository.delete(incident));
+  Future<bool> remove(Incident incident) => _run(() => _repository.delete(schoolId: _schoolId, incident: incident));
 
-  Future<bool> setAffected(Incident incident, bool affected) =>
-      _run(() => _repository.setAffected(incidentId: incident.id, uid: _requireProfile().uid, affected: affected));
+  Future<bool> setAffected(Incident incident, bool affected) => _run(
+    () => _repository.setAffected(
+      schoolId: _schoolId,
+      incidentId: incident.id,
+      uid: _requireProfile().uid,
+      affected: affected,
+    ),
+  );
 
   Future<bool> changeStatus(Incident incident, IncidentStatus status, String note) => _run(
-    () => _repository.changeStatus(incident: incident, status: status, note: note, actorName: _requireProfile().name),
+    () => _repository.changeStatus(
+      schoolId: _schoolId,
+      incident: incident,
+      status: status,
+      note: note,
+      actorName: _requireProfile().name,
+    ),
   );
 }

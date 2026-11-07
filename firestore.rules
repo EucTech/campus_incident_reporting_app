@@ -6,25 +6,61 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function hasAluEmail() {
-      return request.auth.token.email.matches('.*@(alustudent|alueducation)[.]com$');
+    function myEmail() {
+      return request.auth.token.email.lower();
     }
 
-    function profile() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    function userPath(uid) {
+      return /databases/$(database)/documents/users/$(uid);
     }
 
-    function verified() {
-      return signedIn() && hasAluEmail() && request.auth.token.email_verified == true
-        && !('deletedAt' in profile());
+    function schoolPath(schoolId) {
+      return /databases/$(database)/documents/schools/$(schoolId);
     }
 
-    function isStaff() {
-      return verified() && profile().role == 'staff';
+    function me() {
+      return get(userPath(request.auth.uid)).data;
+    }
+
+    function active() {
+      return signedIn() && request.auth.token.email_verified == true && me().get('deletedAt', null) == null;
+    }
+
+    function memberOf(schoolId) {
+      return active() && me().schoolId == schoolId && get(schoolPath(schoolId)).data.status == 'approved';
+    }
+
+    function staffOf(schoolId) {
+      return memberOf(schoolId) && me().role in ['staff', 'admin'];
+    }
+
+    function adminOf(schoolId) {
+      return memberOf(schoolId) && me().role == 'admin';
     }
 
     function changedKeys() {
       return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    function validDomain(domain) {
+      return domain is string
+        && domain.matches('^[a-z0-9-]+([.][a-z0-9-]+)+$')
+        && !(domain in ['gmail.com', 'googlemail.com', 'yahoo.com', 'ymail.com', 'outlook.com',
+          'hotmail.com', 'live.com', 'icloud.com', 'aol.com', 'proton.me', 'protonmail.com']);
+    }
+
+    function validJoin(uid) {
+      let data = request.resource.data;
+      return changedKeys().hasOnly(['schoolId', 'role'])
+        && data.schoolId is string
+        && (
+          (data.role == 'student'
+            && get(/databases/$(database)/documents/domains/$(myEmail().split('@')[1])).data.schoolId == data.schoolId
+            && get(schoolPath(data.schoolId)).data.status == 'approved')
+          || (data.role == 'staff'
+            && get(/databases/$(database)/documents/schools/$(data.schoolId)/invites/$(myEmail())).data.status == 'pending')
+          || (data.role == 'admin' && getAfter(schoolPath(data.schoolId)).data.adminUid == uid)
+        );
     }
 
     function validIncident() {
@@ -43,38 +79,97 @@ service cloud.firestore {
     }
 
     match /users/{uid} {
-      allow read: if signedIn() && (request.auth.uid == uid || isStaff());
-      allow create: if signedIn() && hasAluEmail()
-        && request.auth.uid == uid
-        && request.resource.data.role == 'student'
-        && request.resource.data.email == request.auth.token.email;
+      allow read: if signedIn() && (request.auth.uid == uid || adminOf(resource.data.schoolId));
+
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name', 'email', 'role', 'schoolId', 'createdAt'])
+        && request.resource.data.role == 'none'
+        && request.resource.data.schoolId == null
+        && request.resource.data.email == myEmail();
+
       allow update: if signedIn() && request.auth.uid == uid
-        && !('deletedAt' in resource.data)
-        && !changedKeys().hasAny(['role'])
-        && (!changedKeys().hasAny(['email']) || request.resource.data.email == request.auth.token.email);
+        && resource.data.get('deletedAt', null) == null
+        && (
+          (!changedKeys().hasAny(['role', 'schoolId'])
+            && (!changedKeys().hasAny(['email']) || request.resource.data.email == myEmail()))
+          || (resource.data.schoolId == null && validJoin(uid))
+        );
+
+      allow update: if adminOf(resource.data.schoolId)
+        && resource.data.role == 'staff'
+        && changedKeys().hasOnly(['role', 'schoolId'])
+        && request.resource.data.role == 'none'
+        && request.resource.data.schoolId == null;
     }
 
-    match /incidents/{incidentId} {
-      allow read: if verified();
+    match /domains/{domain} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['schoolId'])
+        && getAfter(schoolPath(request.resource.data.schoolId)).data.adminUid == request.auth.uid
+        && domain in getAfter(schoolPath(request.resource.data.schoolId)).data.studentDomains;
+    }
 
-      allow create: if verified() && validIncident()
-        && request.resource.data.reporterId == request.auth.uid
-        && request.resource.data.status == 'submitted';
+    match /schools/{schoolId} {
+      allow read: if signedIn();
 
-      allow update: if isStaff()
-        && changedKeys().hasOnly(['status', 'timeline', 'updatedAt']);
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['name', 'studentDomains', 'status', 'adminUid', 'adminEmail', 'createdAt'])
+        && request.resource.data.adminUid == request.auth.uid
+        && request.resource.data.adminEmail == myEmail()
+        && request.resource.data.status == 'approved'
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 80
+        && request.resource.data.studentDomains is list
+        && request.resource.data.studentDomains.size() == 1
+        && validDomain(request.resource.data.studentDomains[0])
+        && me().schoolId == null;
 
-      allow update: if verified() && validIncident()
-        && resource.data.reporterId == request.auth.uid
-        && resource.data.status == 'submitted'
-        && changedKeys().hasOnly(['title', 'description', 'location', 'category', 'severity', 'imageUrl', 'imagePath', 'updatedAt']);
+      match /invites/{email} {
+        allow read: if adminOf(schoolId) || (signedIn() && email == myEmail());
 
-      allow update: if verified()
-        && changedKeys().hasOnly(['affectedBy'])
-        && togglesOwnAffected();
+        allow create: if adminOf(schoolId)
+          && email == email.lower()
+          && request.resource.data.keys().hasOnly(['email', 'role', 'status', 'invitedBy', 'invitedAt'])
+          && request.resource.data.email == email
+          && request.resource.data.role == 'staff'
+          && request.resource.data.status == 'pending';
 
-      allow delete: if isStaff()
-        || (verified() && resource.data.reporterId == request.auth.uid && resource.data.status == 'submitted');
+        allow update: if signedIn() && email == myEmail()
+          && resource.data.status == 'pending'
+          && changedKeys().hasOnly(['status', 'acceptedAt'])
+          && request.resource.data.status == 'accepted'
+          && getAfter(userPath(request.auth.uid)).data.schoolId == schoolId;
+
+        allow delete: if adminOf(schoolId);
+      }
+
+      match /incidents/{incidentId} {
+        allow read: if memberOf(schoolId);
+
+        allow create: if memberOf(schoolId) && validIncident()
+          && request.resource.data.reporterId == request.auth.uid
+          && request.resource.data.status == 'submitted';
+
+        allow update: if staffOf(schoolId)
+          && changedKeys().hasOnly(['status', 'timeline', 'updatedAt']);
+
+        allow update: if memberOf(schoolId) && validIncident()
+          && resource.data.reporterId == request.auth.uid
+          && resource.data.status == 'submitted'
+          && changedKeys().hasOnly(['title', 'description', 'location', 'category', 'severity', 'imageUrl', 'imagePath', 'updatedAt']);
+
+        allow update: if memberOf(schoolId)
+          && changedKeys().hasOnly(['affectedBy'])
+          && togglesOwnAffected();
+
+        allow delete: if staffOf(schoolId)
+          || (memberOf(schoolId) && resource.data.reporterId == request.auth.uid && resource.data.status == 'submitted');
+      }
+    }
+
+    match /{path=**}/invites/{email} {
+      allow read: if signedIn() && resource.data.email == myEmail();
     }
   }
 }
