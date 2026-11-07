@@ -16,7 +16,6 @@ import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../auth/application/auth_providers.dart';
-import '../../auth/domain/app_user.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -108,9 +107,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Widget build(BuildContext context) {
     final p = context.palette;
     final profile = ref.watch(profileProvider).value;
-    final previewUser = _removePhoto && profile != null
-        ? AppUser(uid: profile.uid, name: profile.name, email: profile.email, role: profile.role)
-        : profile;
+    final previewUser = _removePhoto ? profile?.withoutPhoto() : profile;
     final hasPhoto = _photo != null || previewUser?.photoUrl != null;
 
     return Scaffold(
@@ -174,7 +171,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         validator: Validators.name,
                       ),
                       const SizedBox(height: 18),
-                      Text('ALU email', style: context.text.labelMedium),
+                      Text('Email', style: context.text.labelMedium),
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.fromLTRB(18, 8, 8, 8),
@@ -283,9 +280,9 @@ class _ChangeEmailSheetState extends ConsumerState<_ChangeEmailSheet> {
             ),
             const SizedBox(height: 16),
             LabeledField(
-              label: 'New ALU email',
+              label: 'New email',
               controller: _email,
-              hint: 'you@alustudent.com',
+              hint: 'you@school.com',
               keyboardType: TextInputType.emailAddress,
               validator: Validators.email,
             ),

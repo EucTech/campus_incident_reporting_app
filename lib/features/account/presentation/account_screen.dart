@@ -11,6 +11,7 @@ import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../incidents/application/incident_providers.dart';
+import '../../schools/application/school_providers.dart';
 import 'account_security_sheets.dart';
 
 class AccountScreen extends ConsumerWidget {
@@ -21,6 +22,7 @@ class AccountScreen extends ConsumerWidget {
     final p = context.palette;
     final profile = ref.watch(profileProvider).value;
     final stats = ref.watch(campusStatsProvider);
+    final schoolName = ref.watch(currentSchoolProvider).value?.name ?? 'your school';
 
     return SafeArea(
       bottom: false,
@@ -57,7 +59,7 @@ class AccountScreen extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(color: p.raised, borderRadius: BorderRadius.circular(100)),
                         child: Text(
-                          (profile?.isStaff ?? false) ? 'Staff' : 'Student',
+                          '${profile?.role.label ?? ''} · $schoolName',
                           style: context.text.labelMedium?.copyWith(fontSize: 11.5),
                         ),
                       ),
@@ -91,6 +93,15 @@ class AccountScreen extends ConsumerWidget {
             style: PillStyle.outline,
             onPressed: () => context.push('/profile'),
           ),
+          if (profile?.isAdmin ?? false) ...[
+            const SizedBox(height: 10),
+            PillButton(
+              label: 'Manage team',
+              icon: Icons.groups_outlined,
+              compact: true,
+              onPressed: () => context.push('/team'),
+            ),
+          ],
           const SizedBox(height: 26),
           Text('Appearance', style: context.text.titleLarge),
           const SizedBox(height: 12),
@@ -99,7 +110,7 @@ class AccountScreen extends ConsumerWidget {
           Text('Privacy', style: context.text.titleLarge),
           const SizedBox(height: 6),
           Text(
-            'Reports are visible to verified ALU accounts. When you hide your name, other people on Pulse see you as Anonymous.',
+            'Reports are visible only to verified members of $schoolName. When you hide your name, other people see you as Anonymous.',
             style: context.text.bodyMedium,
           ),
           const SizedBox(height: 26),
