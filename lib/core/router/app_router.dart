@@ -15,17 +15,22 @@ import '../../features/incidents/application/incident_providers.dart';
 import '../../features/incidents/presentation/incident_detail_screen.dart';
 import '../../features/incidents/presentation/report_form_screen.dart';
 import '../../features/incidents/presentation/reports_screen.dart';
+import '../../features/schools/presentation/join_school_screen.dart';
+import '../../features/schools/presentation/register_school_screen.dart';
+import '../../features/schools/presentation/team_screen.dart';
 import '../../features/staff/presentation/staff_desk_screen.dart';
 import '../theme/app_palette.dart';
 import '../widgets/pulse_rings.dart';
 import 'app_shell.dart';
 import 'route_guard.dart';
+import 'session_stage.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = ValueNotifier(0);
   ref.onDispose(refresh.dispose);
-  ref.listen(authStageProvider, (_, _) => refresh.value++);
+  ref.listen(sessionStageProvider, (_, _) => refresh.value++);
   ref.listen(isStaffProvider, (_, _) => refresh.value++);
+  ref.listen(isAdminProvider, (_, _) => refresh.value++);
   ref.listen(profileProvider, (_, next) {
     if (next.value?.isDeleted ?? false) ref.read(authRepositoryProvider).signOut();
   });
@@ -34,17 +39,21 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: Routes.splash,
     refreshListenable: refresh,
     redirect: (context, state) => guardRoute(
-      stage: ref.read(authStageProvider),
+      stage: ref.read(sessionStageProvider),
       location: state.matchedLocation,
       isStaff: ref.read(isStaffProvider),
+      isAdmin: ref.read(isAdminProvider),
     ),
     routes: [
       GoRoute(path: Routes.splash, builder: (_, _) => const _SplashScreen()),
       GoRoute(path: Routes.welcome, builder: (_, _) => const WelcomeScreen()),
       GoRoute(path: Routes.login, builder: (_, _) => const LoginScreen()),
       GoRoute(path: Routes.register, builder: (_, _) => const RegisterScreen()),
+      GoRoute(path: Routes.registerSchool, builder: (_, _) => const RegisterSchoolScreen()),
       GoRoute(path: Routes.forgot, builder: (_, _) => const ForgotPasswordScreen()),
       GoRoute(path: Routes.verify, builder: (_, _) => const VerifyEmailScreen()),
+      GoRoute(path: Routes.join, builder: (_, _) => const JoinSchoolScreen()),
+      GoRoute(path: Routes.team, builder: (_, _) => const TeamScreen()),
       GoRoute(path: '/report', builder: (_, _) => const ReportFormScreen()),
       GoRoute(path: '/profile', builder: (_, _) => const EditProfileScreen()),
       GoRoute(

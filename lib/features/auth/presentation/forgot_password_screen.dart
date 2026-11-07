@@ -45,9 +45,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         Form(
           key: _formKey,
           child: LabeledField(
-            label: 'ALU email',
+            label: 'Email',
             controller: _email,
-            hint: 'you@alustudent.com',
+            hint: 'you@school.com',
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.done,
             validator: Validators.email,

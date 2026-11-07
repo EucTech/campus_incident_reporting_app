@@ -83,7 +83,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                 ),
               ),
               const SizedBox(height: 28),
-              Text('Check your\nALU inbox.', style: context.text.displayMedium, textAlign: TextAlign.center),
+              Text('Check your\ninbox.', style: context.text.displayMedium, textAlign: TextAlign.center),
               const SizedBox(height: 12),
               Text(
                 'We sent a verification link to $email. This screen moves on by itself once you open it.',

@@ -6,6 +6,7 @@ import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/pulse_rings.dart';
 import '../../../core/widgets/pill_button.dart';
+import '../../../core/widgets/pressable.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -64,6 +65,18 @@ class WelcomeScreen extends StatelessWidget {
                 PillButton(label: 'Create account', onPressed: () => context.push('/register')),
                 const SizedBox(height: 10),
                 PillButton(label: 'Log in', style: PillStyle.outline, onPressed: () => context.push('/login')),
+                const SizedBox(height: 6),
+                Pressable(
+                  onTap: () => context.push('/register-school'),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Text(
+                      'Run a school? Register it on Pulse',
+                      textAlign: TextAlign.center,
+                      style: context.text.labelMedium?.copyWith(color: p.muted),
+                    ),
+                  ),
+                ),
               ],
             ),
           ).animate().slideY(begin: 0.25, duration: 550.ms, curve: Curves.easeOutCubic).fadeIn(),

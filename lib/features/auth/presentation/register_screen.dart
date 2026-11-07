@@ -9,7 +9,7 @@ import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/state_views.dart';
-import '../application/auth_providers.dart';
+import '../../schools/application/school_providers.dart';
 import 'auth_scaffold.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -35,17 +35,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    final controller = ref.read(authControllerProvider.notifier);
-    final done = await controller.register(_name.text, _email.text, _password.text);
-    if (!done && mounted) showMessage(context, friendlyError(ref.read(authControllerProvider).error!));
+    final controller = ref.read(onboardingControllerProvider.notifier);
+    final done = await controller.registerMember(name: _name.text, email: _email.text, password: _password.text);
+    if (!done) showAppMessage(friendlyError(controller.lastError));
   }
 
   @override
   Widget build(BuildContext context) {
-    final loading = ref.watch(authControllerProvider).isLoading;
+    final loading = ref.watch(onboardingControllerProvider).isLoading;
     return AuthScaffold(
       title: 'Join\nPulse.',
-      subtitle: 'Only verified ALU emails can get in, so every report comes from campus.',
+      subtitle: 'Students use their school email. Staff use the email their school admin invited.',
       children: [
         Form(
           key: _formKey,
@@ -62,9 +62,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 const SizedBox(height: 18),
                 LabeledField(
-                  label: 'ALU email',
+                  label: 'Email',
                   controller: _email,
-                  hint: 'you@alustudent.com',
+                  hint: 'you@school.com',
                   keyboardType: TextInputType.emailAddress,
                   autofillHints: const [AutofillHints.email],
                   validator: Validators.email,
