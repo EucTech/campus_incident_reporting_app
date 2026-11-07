@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "284033919656",
+    "project_id": "pulse-campus-7aad8",
+    "storage_bucket": "pulse-campus-7aad8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:284033919656:android:edc3e149c8d5bfc7d7f09d",
+        "android_client_info": {
+          "package_name": "com.euctech.campus_incident_reporting_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0fwid6ZxzWFHg6fdVbjrnHlAnH2JlJ-8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,80 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function hasAluEmail() {
+      return request.auth.token.email.matches('.*@(alustudent|alueducation)[.]com$');
+    }
+
+    function profile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function verified() {
+      return signedIn() && hasAluEmail() && request.auth.token.email_verified == true
+        && !('deletedAt' in profile());
+    }
+
+    function isStaff() {
+      return verified() && profile().role == 'staff';
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    function validIncident() {
+      let data = request.resource.data;
+      return data.title is string && data.title.size() >= 5 && data.title.size() <= 80
+        && data.description is string && data.description.size() >= 15 && data.description.size() <= 1000
+        && data.location is string && data.location.size() >= 2 && data.location.size() <= 80
+        && data.category in ['facilities', 'water', 'electricity', 'furniture', 'sanitation', 'safety', 'other']
+        && data.severity in ['low', 'medium', 'high'];
+    }
+
+    function togglesOwnAffected() {
+      let before = resource.data.affectedBy.toSet();
+      let after = request.resource.data.affectedBy.toSet();
+      return after.difference(before).union(before.difference(after)).hasOnly([request.auth.uid]);
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isStaff());
+      allow create: if signedIn() && hasAluEmail()
+        && request.auth.uid == uid
+        && request.resource.data.role == 'student'
+        && request.resource.data.email == request.auth.token.email;
+      allow update: if signedIn() && request.auth.uid == uid
+        && !('deletedAt' in resource.data)
+        && !changedKeys().hasAny(['role'])
+        && (!changedKeys().hasAny(['email']) || request.resource.data.email == request.auth.token.email);
+    }
+
+    match /incidents/{incidentId} {
+      allow read: if verified();
+
+      allow create: if verified() && validIncident()
+        && request.resource.data.reporterId == request.auth.uid
+        && request.resource.data.status == 'submitted';
+
+      allow update: if isStaff()
+        && changedKeys().hasOnly(['status', 'timeline', 'updatedAt']);
+
+      allow update: if verified() && validIncident()
+        && resource.data.reporterId == request.auth.uid
+        && resource.data.status == 'submitted'
+        && changedKeys().hasOnly(['title', 'description', 'location', 'category', 'severity', 'imageUrl', 'imagePath', 'updatedAt']);
+
+      allow update: if verified()
+        && changedKeys().hasOnly(['affectedBy'])
+        && togglesOwnAffected();
+
+      allow delete: if isStaff()
+        || (verified() && resource.data.reporterId == request.auth.uid && resource.data.status == 'submitted');
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "emulators": {
+    "auth": {
+      "host": "0.0.0.0",
+      "port": 9099
+    },
+    "firestore": {
+      "host": "0.0.0.0",
+      "port": 8080
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    },
+    "singleProjectMode": true
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "pulse-campus-7aad8",
+          "appId": "1:284033919656:android:edc3e149c8d5bfc7d7f09d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "pulse-campus-7aad8",
+          "configurations": {
+            "android": "1:284033919656:android:edc3e149c8d5bfc7d7f09d",
+            "ios": "1:284033919656:ios:3ceb4052245274d1d7f09d"
+          }
+        }
+      }
+    }
+  }
+}

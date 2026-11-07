@@ -1,18 +1,26 @@
-# campus_incident_reporting_app
+# Pulse
 
-A new Flutter project.
+Pulse is a Flutter mobile app for reporting campus issues at ALU. Students sign in with a verified ALU email, report problems such as water, electricity, or safety issues with an optional photo, and track each report until it is resolved. Authorized staff review reports and update their status.
 
-## Getting Started
+Built with Flutter, Riverpod, Firebase Authentication, Cloud Firestore, and Cloudinary for photos.
 
-This project is a starting point for a Flutter application.
+## How to run
 
-A few resources to get you started if this is your first Flutter project:
+**Requirements:** Flutter 3.47+ and an Android emulator or device.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+```bash
+flutter pub get
+flutter run
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-![alt text](image.png)
+The app is already connected to its Firebase project and Cloudinary account, so no extra setup is needed.
+
+## Staff access
+
+New accounts are students. To make someone staff, open their document in the Firestore `users` collection and set `role` to `staff`.
+
+## Tests
+
+```bash
+flutter test
+```
