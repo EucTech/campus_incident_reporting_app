@@ -19,11 +19,10 @@ import '../../features/schools/presentation/join_school_screen.dart';
 import '../../features/schools/presentation/register_school_screen.dart';
 import '../../features/schools/presentation/team_screen.dart';
 import '../../features/staff/presentation/staff_desk_screen.dart';
-import '../theme/app_palette.dart';
-import '../widgets/pulse_rings.dart';
 import 'app_shell.dart';
 import 'route_guard.dart';
 import 'session_stage.dart';
+import 'splash_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = ValueNotifier(0);
@@ -45,7 +44,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       isAdmin: ref.read(isAdminProvider),
     ),
     routes: [
-      GoRoute(path: Routes.splash, builder: (_, _) => const _SplashScreen()),
+      GoRoute(path: Routes.splash, builder: (_, _) => const SplashScreen()),
       GoRoute(path: Routes.welcome, builder: (_, _) => const WelcomeScreen()),
       GoRoute(path: Routes.login, builder: (_, _) => const LoginScreen()),
       GoRoute(path: Routes.register, builder: (_, _) => const RegisterScreen()),
@@ -91,29 +90,7 @@ class _EditReportRoute extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final incident = ref.read(incidentByIdProvider(incidentId)).value;
-    if (incident == null) return const _SplashScreen();
+    if (incident == null) return const SplashScreen();
     return ReportFormScreen(existing: incident);
-  }
-}
-
-class _SplashScreen extends StatelessWidget {
-  const _SplashScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    final p = context.palette;
-    return Scaffold(
-      body: Center(
-        child: PulseRings(
-          size: 220,
-          color: p.signalText,
-          child: Container(
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(color: p.signal, shape: BoxShape.circle),
-          ),
-        ),
-      ),
-    );
   }
 }

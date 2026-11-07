@@ -40,6 +40,13 @@ class AuthRepository {
     'createdAt': FieldValue.serverTimestamp(),
   });
 
+  Future<void> ensureProfile() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    final profile = await _userDoc(user.uid).get(const GetOptions(source: Source.server));
+    if (!profile.exists) await createProfile(user, user.displayName ?? 'Pulse member');
+  }
+
   Future<void> discardNewAccount() async => _auth.currentUser?.delete();
 
   Future<void> sendVerification() async => _auth.currentUser?.sendEmailVerification();
