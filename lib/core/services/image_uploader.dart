@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
 import '../config/cloudinary_config.dart';
+import '../utils/failure.dart';
 
 final imageUploaderProvider = Provider<ImageUploader>((ref) {
   final client = http.Client();
@@ -19,11 +20,12 @@ class UploadedImage {
   final String id;
 }
 
-class ImageUploadFailed implements Exception {
+class ImageUploadFailed extends AppException {
   const ImageUploadFailed(this.reason);
 
   final String reason;
 
+  @override
   String get message => 'The photo could not be uploaded. Check your connection and try again.';
 }
 

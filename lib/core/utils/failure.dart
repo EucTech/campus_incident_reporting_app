@@ -1,11 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 
-import '../services/image_uploader.dart';
+abstract class AppException implements Exception {
+  const AppException();
+
+  String get message;
+}
 
 String friendlyError(Object error) {
-  if (error is NotAluEmail) return error.message;
-  if (error is AccountDeleted) return error.message;
-  if (error is ImageUploadFailed) return error.message;
+  if (error is AppException) return error.message;
   if (error is! FirebaseException) return 'Something went wrong. Please try again.';
   return switch (error.code) {
     'invalid-credential' ||
@@ -24,12 +26,38 @@ String friendlyError(Object error) {
   };
 }
 
-class AccountDeleted implements Exception {
+class AccountDeleted extends AppException {
   const AccountDeleted();
-  String get message => 'This account was deleted. Contact campus support to restore it.';
+
+  @override
+  String get message => 'This account was deleted. Contact your school admin to restore it.';
 }
 
-class NotAluEmail implements Exception {
-  const NotAluEmail();
-  String get message => 'Only ALU email addresses can use Pulse.';
+class NoSchoolForEmail extends AppException {
+  const NoSchoolForEmail();
+
+  @override
+  String get message =>
+      'No school on Pulse uses this email. Students sign up with their school email, and staff need an invite from their school admin.';
+}
+
+class DomainTaken extends AppException {
+  const DomainTaken();
+
+  @override
+  String get message => 'A school on Pulse already uses this email domain.';
+}
+
+class AlreadyInvited extends AppException {
+  const AlreadyInvited();
+
+  @override
+  String get message => 'This email has already been invited.';
+}
+
+class SchoolEmailRequired extends AppException {
+  const SchoolEmailRequired();
+
+  @override
+  String get message => 'Students must keep an email from their school domain.';
 }

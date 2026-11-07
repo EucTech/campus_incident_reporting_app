@@ -2,18 +2,24 @@ import 'package:campus_incident_reporting_app/core/utils/validators.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('ALU email', () {
-    test('accepts student and staff domains in any case', () {
-      expect(Validators.isAluEmail('a.student@alustudent.com'), isTrue);
-      expect(Validators.isAluEmail('Staff.Member@ALUEDUCATION.com'), isTrue);
-    });
+  test('accepts real email shapes and rejects broken ones', () {
+    expect(Validators.email('a.student@students.school.com'), isNull);
+    expect(Validators.email('someone+staff@gmail.com'), isNull);
+    expect(Validators.email('@school.com'), isNotNull);
+    expect(Validators.email('a@b'), isNotNull);
+    expect(Validators.email(''), isNotNull);
+  });
 
-    test('rejects other domains and lookalikes', () {
-      expect(Validators.isAluEmail('someone@gmail.com'), isFalse);
-      expect(Validators.isAluEmail('someone@alustudent.com.evil.io'), isFalse);
-      expect(Validators.isAluEmail('@alustudent.com'), isFalse);
-      expect(Validators.isAluEmail('a@b@alustudent.com'), isFalse);
-    });
+  test('reads the email domain in lower case', () {
+    expect(Validators.emailDomain('Amara@Students.School.com'), 'students.school.com');
+  });
+
+  test('school domains must be real and not public mail providers', () {
+    expect(Validators.studentDomain('students.school.com'), isNull);
+    expect(Validators.studentDomain('@Students.School.com'), isNull);
+    expect(Validators.studentDomain('gmail.com'), isNotNull);
+    expect(Validators.studentDomain('not a domain'), isNotNull);
+    expect(Validators.studentDomain('localhost'), isNotNull);
   });
 
   test('password needs length and a number', () {
