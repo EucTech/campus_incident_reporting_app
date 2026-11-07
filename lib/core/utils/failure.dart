@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 
 abstract class AppException implements Exception {
@@ -8,6 +10,7 @@ abstract class AppException implements Exception {
 
 String friendlyError(Object error) {
   if (error is AppException) return error.message;
+  if (error is TimeoutException) return 'The server did not respond. Check your internet connection and try again.';
   if (error is! FirebaseException) return 'Something went wrong. Please try again.';
   return switch (error.code) {
     'invalid-credential' ||
