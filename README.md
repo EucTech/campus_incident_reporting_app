@@ -1,18 +1,49 @@
-# campus_incident_reporting_app
+# Pulse
 
-A new Flutter project.
+Pulse is a Flutter mobile app for reporting campus issues at ALU. Students sign in with a verified ALU email, report problems such as water, electricity, or safety issues with an optional photo, and track each report until it is resolved. Authorized staff review reports and update their status.
 
-## Getting Started
+Built with Flutter, Riverpod, Firebase Authentication, Cloud Firestore, and Firebase Storage.
 
-This project is a starting point for a Flutter application.
+## How to run
 
-A few resources to get you started if this is your first Flutter project:
+**Requirements:** Flutter 3.47+, an Android emulator or device, Node.js, and the [Firebase CLI](https://firebase.google.com/docs/cli).
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+1. Install the packages:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-![alt text](image.png)
+   ```bash
+   flutter pub get
+   ```
+
+2. Connect your Firebase project. Enable Email/Password sign-in, Firestore, and Storage in the console, then run:
+
+   ```bash
+   firebase login
+   flutterfire configure
+   firebase use <your-project-id>
+   firebase deploy --only firestore:rules,storage
+   ```
+
+3. Start an emulator and run the app:
+
+   ```bash
+   flutter run
+   ```
+
+## Staff access
+
+New accounts are students. To make someone staff, open their document in the Firestore `users` collection and set `role` to `staff`.
+
+## Run without a Firebase project
+
+Use the local Firebase emulators. This needs Java and skips step 2:
+
+```bash
+firebase emulators:start
+flutter run --dart-define=USE_FIREBASE_EMULATOR=true
+```
+
+## Tests
+
+```bash
+flutter test
+```
