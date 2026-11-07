@@ -40,8 +40,18 @@ class AccountScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(profile?.name ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: context.text.titleLarge),
-                      Text(profile?.email ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: context.text.bodyMedium),
+                      Text(
+                        profile?.name ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.text.titleLarge,
+                      ),
+                      Text(
+                        profile?.email ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.text.bodyMedium,
+                      ),
                       const SizedBox(height: 7),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -60,11 +70,17 @@ class AccountScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _Stat(value: stats.mine, label: 'Reported')),
+              Expanded(
+                child: _Stat(value: stats.mine, label: 'Reported'),
+              ),
               const SizedBox(width: 12),
-              Expanded(child: _Stat(value: stats.mineOpen, label: 'Open')),
+              Expanded(
+                child: _Stat(value: stats.mineOpen, label: 'Open'),
+              ),
               const SizedBox(width: 12),
-              Expanded(child: _Stat(value: stats.mineResolved, label: 'Resolved')),
+              Expanded(
+                child: _Stat(value: stats.mineResolved, label: 'Resolved'),
+              ),
             ],
           ),
           const SizedBox(height: 12),

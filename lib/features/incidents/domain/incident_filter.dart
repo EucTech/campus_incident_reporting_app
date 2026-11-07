@@ -16,13 +16,12 @@ class IncidentFilter {
     IncidentStatus? Function()? status,
     IncidentCategory? Function()? category,
     bool? mineOnly,
-  }) =>
-      IncidentFilter(
-        query: query ?? this.query,
-        status: status != null ? status() : this.status,
-        category: category != null ? category() : this.category,
-        mineOnly: mineOnly ?? this.mineOnly,
-      );
+  }) => IncidentFilter(
+    query: query ?? this.query,
+    status: status != null ? status() : this.status,
+    category: category != null ? category() : this.category,
+    mineOnly: mineOnly ?? this.mineOnly,
+  );
 
   List<Incident> apply(List<Incident> incidents, String? uid) {
     final needle = query.trim().toLowerCase();
@@ -51,9 +50,9 @@ List<Incident> similarOpenIncidents(List<Incident> incidents, IncidentCategory c
   final place = location.trim().toLowerCase();
   if (place.length < 2) return const [];
   return incidents
-      .where((incident) =>
-          incident.status.isOpen &&
-          incident.category == category &&
-          incident.location.toLowerCase().contains(place))
+      .where(
+        (incident) =>
+            incident.status.isOpen && incident.category == category && incident.location.toLowerCase().contains(place),
+      )
       .toList();
 }

@@ -37,8 +37,7 @@ class StatusTrack extends StatelessWidget {
                       tween: Tween(begin: 0, end: reached / stops),
                       duration: const Duration(milliseconds: 700),
                       curve: Curves.easeOutCubic,
-                      builder: (context, value, _) =>
-                          Container(height: 2, width: width * value, color: activeColor),
+                      builder: (context, value, _) => Container(height: 2, width: width * value, color: activeColor),
                     ),
                   ),
                   Row(
@@ -69,10 +68,7 @@ class StatusTrack extends StatelessWidget {
             for (final stage in IncidentStatus.stages)
               Text(
                 stage.label,
-                style: context.text.labelSmall?.copyWith(
-                  letterSpacing: 0,
-                  color: stage == status ? p.ink : p.muted,
-                ),
+                style: context.text.labelSmall?.copyWith(letterSpacing: 0, color: stage == status ? p.ink : p.muted),
               ),
           ],
         ),
@@ -103,13 +99,9 @@ class StatusHistory extends StatelessWidget {
                       width: 10,
                       height: 10,
                       margin: const EdgeInsets.only(top: 5),
-                      decoration: BoxDecoration(
-                        color: latestFirst[i].status.color(p),
-                        shape: BoxShape.circle,
-                      ),
+                      decoration: BoxDecoration(color: latestFirst[i].status.color(p), shape: BoxShape.circle),
                     ),
-                    if (i != latestFirst.length - 1)
-                      Expanded(child: Container(width: 1.5, color: p.line)),
+                    if (i != latestFirst.length - 1) Expanded(child: Container(width: 1.5, color: p.line)),
                   ],
                 ),
                 const SizedBox(width: 14),

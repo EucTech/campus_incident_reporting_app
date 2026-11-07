@@ -12,8 +12,7 @@ enum IncidentCategory {
   final String label;
   final String hint;
 
-  static IncidentCategory parse(String? value) =>
-      values.firstWhere((item) => item.name == value, orElse: () => other);
+  static IncidentCategory parse(String? value) => values.firstWhere((item) => item.name == value, orElse: () => other);
 }
 
 enum IncidentSeverity {
@@ -25,8 +24,7 @@ enum IncidentSeverity {
 
   final String label;
 
-  static IncidentSeverity parse(String? value) =>
-      values.firstWhere((item) => item.name == value, orElse: () => medium);
+  static IncidentSeverity parse(String? value) => values.firstWhere((item) => item.name == value, orElse: () => medium);
 }
 
 enum IncidentStatus {
@@ -45,12 +43,12 @@ enum IncidentStatus {
   bool get isOpen => this != resolved && this != dismissed;
 
   List<IncidentStatus> get nextOptions => switch (this) {
-        submitted => const [inReview, inProgress, resolved, dismissed],
-        inReview => const [inProgress, resolved, dismissed],
-        inProgress => const [resolved, dismissed],
-        resolved => const [inProgress],
-        dismissed => const [inReview],
-      };
+    submitted => const [inReview, inProgress, resolved, dismissed],
+    inReview => const [inProgress, resolved, dismissed],
+    inProgress => const [resolved, dismissed],
+    resolved => const [inProgress],
+    dismissed => const [inReview],
+  };
 
   static IncidentStatus parse(String? value) =>
       values.firstWhere((item) => item.name == value, orElse: () => submitted);

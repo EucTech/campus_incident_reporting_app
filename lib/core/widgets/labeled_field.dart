@@ -59,9 +59,7 @@ class _LabeledFieldState extends State<LabeledField> {
           autofillHints: widget.autofillHints,
           obscureText: _hidden,
           maxLines: widget.maxLines,
-          inputFormatters: [
-            if (widget.maxLength != null) LengthLimitingTextInputFormatter(widget.maxLength),
-          ],
+          inputFormatters: [if (widget.maxLength != null) LengthLimitingTextInputFormatter(widget.maxLength)],
           autovalidateMode: AutovalidateMode.onUserInteraction,
           onFieldSubmitted: widget.onSubmitted,
           onChanged: widget.onChanged,

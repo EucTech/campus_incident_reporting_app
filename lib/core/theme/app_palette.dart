@@ -66,20 +66,20 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   @override
   AppPalette copyWith({Color? canvas, Color? surface, Color? ink}) => AppPalette(
-        canvas: canvas ?? this.canvas,
-        surface: surface ?? this.surface,
-        raised: raised,
-        line: line,
-        ink: ink ?? this.ink,
-        muted: muted,
-        faint: faint,
-        signal: signal,
-        signalInk: signalInk,
-        signalText: signalText,
-        amber: amber,
-        sky: sky,
-        danger: danger,
-      );
+    canvas: canvas ?? this.canvas,
+    surface: surface ?? this.surface,
+    raised: raised,
+    line: line,
+    ink: ink ?? this.ink,
+    muted: muted,
+    faint: faint,
+    signal: signal,
+    signalInk: signalInk,
+    signalText: signalText,
+    amber: amber,
+    sky: sky,
+    danger: danger,
+  );
 
   @override
   AppPalette lerp(ThemeExtension<AppPalette>? other, double t) {

@@ -55,11 +55,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           ),
         ),
         const SizedBox(height: 26),
-        PillButton(
-          label: 'Send reset link',
-          loading: ref.watch(authControllerProvider).isLoading,
-          onPressed: _submit,
-        ),
+        PillButton(label: 'Send reset link', loading: ref.watch(authControllerProvider).isLoading, onPressed: _submit),
       ],
     );
   }

@@ -60,10 +60,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
     final done = await ref.read(authControllerProvider.notifier).resendVerification();
     if (!mounted) return;
     if (done) setState(_startCooldown);
-    showMessage(
-      context,
-      done ? 'Verification email sent.' : friendlyError(ref.read(authControllerProvider).error!),
-    );
+    showMessage(context, done ? 'Verification email sent.' : friendlyError(ref.read(authControllerProvider).error!));
   }
 
   @override

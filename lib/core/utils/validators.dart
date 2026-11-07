@@ -26,8 +26,7 @@ abstract final class Validators {
     return null;
   }
 
-  static String? requiredPassword(String? value) =>
-      (value ?? '').isEmpty ? 'Enter your password' : null;
+  static String? requiredPassword(String? value) => (value ?? '').isEmpty ? 'Enter your password' : null;
 
   static String? title(String? value) {
     final length = value?.trim().length ?? 0;

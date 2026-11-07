@@ -38,8 +38,7 @@ class AppShell extends ConsumerWidget {
                     children: [
                       _NavItem(icon: Icons.home_outlined, label: 'Home', index: 0, shell: shell),
                       _NavItem(icon: Icons.view_agenda_outlined, label: 'Reports', index: 1, shell: shell),
-                      if (isStaff)
-                        _NavItem(icon: Icons.inbox_outlined, label: 'Desk', index: 2, shell: shell),
+                      if (isStaff) _NavItem(icon: Icons.inbox_outlined, label: 'Desk', index: 2, shell: shell),
                       _NavItem(icon: Icons.person_outline_rounded, label: 'Account', index: 3, shell: shell),
                     ],
                   ),

@@ -30,12 +30,12 @@ class AppUser {
   }
 
   factory AppUser.fromMap(String uid, Map<String, dynamic> map) => AppUser(
-        uid: uid,
-        name: map['name'] as String? ?? '',
-        email: map['email'] as String? ?? '',
-        role: map['role'] == UserRole.staff.name ? UserRole.staff : UserRole.student,
-        photoUrl: map['photoUrl'] as String?,
-        photoPath: map['photoPath'] as String?,
-        isDeleted: map['deletedAt'] != null,
-      );
+    uid: uid,
+    name: map['name'] as String? ?? '',
+    email: map['email'] as String? ?? '',
+    role: map['role'] == UserRole.staff.name ? UserRole.staff : UserRole.student,
+    photoUrl: map['photoUrl'] as String?,
+    photoPath: map['photoPath'] as String?,
+    isDeleted: map['deletedAt'] != null,
+  );
 }

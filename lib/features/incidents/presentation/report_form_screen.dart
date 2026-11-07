@@ -161,10 +161,8 @@ class _ReportFormScreenState extends ConsumerState<ReportFormScreen> {
                   key: _formKey,
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 280),
-                    layoutBuilder: (current, previous) => Stack(
-                      alignment: Alignment.topCenter,
-                      children: [...previous, ?current],
-                    ),
+                    layoutBuilder: (current, previous) =>
+                        Stack(alignment: Alignment.topCenter, children: [...previous, ?current]),
                     transitionBuilder: (child, animation) => FadeTransition(
                       opacity: animation,
                       child: SlideTransition(
@@ -235,9 +233,7 @@ class _ReportFormScreenState extends ConsumerState<ReportFormScreen> {
                         children: [
                           Text(
                             category.label,
-                            style: context.text.titleMedium?.copyWith(
-                              color: _category == category ? p.canvas : p.ink,
-                            ),
+                            style: context.text.titleMedium?.copyWith(color: _category == category ? p.canvas : p.ink),
                           ),
                           Text(
                             category.hint,

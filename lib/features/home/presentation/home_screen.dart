@@ -54,11 +54,22 @@ class HomeScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _StatTile(value: stats.mine, label: 'My reports', onTap: () => _openMine(context, ref))),
+              Expanded(
+                child: _StatTile(value: stats.mine, label: 'My reports', onTap: () => _openMine(context, ref)),
+              ),
               const SizedBox(width: 12),
-              Expanded(child: _StatTile(value: stats.mineOpen, label: 'Still open', onTap: () => _openMine(context, ref))),
+              Expanded(
+                child: _StatTile(value: stats.mineOpen, label: 'Still open', onTap: () => _openMine(context, ref)),
+              ),
               const SizedBox(width: 12),
-              Expanded(child: _StatTile(value: stats.resolved, label: 'Fixed on campus', accent: true, onTap: () => _openResolved(context, ref))),
+              Expanded(
+                child: _StatTile(
+                  value: stats.resolved,
+                  label: 'Fixed on campus',
+                  accent: true,
+                  onTap: () => _openResolved(context, ref),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 28),
@@ -99,10 +110,8 @@ class HomeScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           incidents.when(
             loading: () => const SkeletonList(count: 2, height: 200),
-            error: (error, _) => ErrorView(
-              message: friendlyError(error),
-              onRetry: () => ref.invalidate(incidentsProvider),
-            ),
+            error: (error, _) =>
+                ErrorView(message: friendlyError(error), onRetry: () => ref.invalidate(incidentsProvider)),
             data: (items) => items.isEmpty
                 ? const EmptyView(title: 'All quiet', message: 'Nothing has been reported yet.')
                 : _LatestRail(items: items.take(6).toList()),
@@ -141,10 +150,11 @@ class _LatestRail extends StatelessWidget {
         clipBehavior: Clip.none,
         itemCount: items.length,
         separatorBuilder: (_, _) => const SizedBox(width: 12),
-        itemBuilder: (context, index) => FeatureCard(incident: items[index])
-            .animate()
-            .fadeIn(delay: (index * 70).ms, duration: 350.ms)
-            .slideX(begin: 0.12, curve: Curves.easeOutCubic),
+        itemBuilder: (context, index) =>
+            FeatureCard(incident: items[index])
+                .animate()
+                .fadeIn(delay: (index * 70).ms, duration: 350.ms)
+                .slideX(begin: 0.12, curve: Curves.easeOutCubic),
       ),
     );
   }
@@ -167,11 +177,7 @@ class _HeroCard extends StatelessWidget {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            Positioned(
-              right: -120,
-              top: -120,
-              child: PulseRings(size: 260, color: p.signalText, rings: 4),
-            ),
+            Positioned(right: -120, top: -120, child: PulseRings(size: 260, color: p.signalText, rings: 4)),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -179,10 +185,8 @@ class _HeroCard extends StatelessWidget {
                   tween: Tween(begin: 0, end: open.toDouble()),
                   duration: const Duration(milliseconds: 900),
                   curve: Curves.easeOutCubic,
-                  builder: (context, value, _) => Text(
-                    value.round().toString(),
-                    style: context.text.displayLarge?.copyWith(fontSize: 72),
-                  ),
+                  builder: (context, value, _) =>
+                      Text(value.round().toString(), style: context.text.displayLarge?.copyWith(fontSize: 72)),
                 ),
                 Text(
                   urgent > 0 ? 'open on campus, $urgent urgent' : 'open on campus',
@@ -229,10 +233,7 @@ class _StatTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              '$value',
-              style: context.text.headlineMedium?.copyWith(color: accent ? p.signalInk : p.ink),
-            ),
+            Text('$value', style: context.text.headlineMedium?.copyWith(color: accent ? p.signalInk : p.ink)),
             Text(
               label,
               maxLines: 2,

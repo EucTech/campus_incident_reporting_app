@@ -21,9 +21,8 @@ String? guardRoute({required AuthStage stage, required String location, required
     case AuthStage.unverified:
       return location == Routes.verify ? null : Routes.verify;
     case AuthStage.ready:
-      final isEntryRoute = location == Routes.splash ||
-          location == Routes.verify ||
-          Routes.publicRoutes.contains(location);
+      final isEntryRoute =
+          location == Routes.splash || location == Routes.verify || Routes.publicRoutes.contains(location);
       if (isEntryRoute) return Routes.home;
       if (location.startsWith(Routes.desk) && !isStaff) return Routes.home;
       return null;

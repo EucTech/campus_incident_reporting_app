@@ -63,11 +63,7 @@ class WelcomeScreen extends StatelessWidget {
                 const SizedBox(height: 26),
                 PillButton(label: 'Create account', onPressed: () => context.push('/register')),
                 const SizedBox(height: 10),
-                PillButton(
-                  label: 'Log in',
-                  style: PillStyle.outline,
-                  onPressed: () => context.push('/login'),
-                ),
+                PillButton(label: 'Log in', style: PillStyle.outline, onPressed: () => context.push('/login')),
               ],
             ),
           ).animate().slideY(begin: 0.25, duration: 550.ms, curve: Curves.easeOutCubic).fadeIn(),

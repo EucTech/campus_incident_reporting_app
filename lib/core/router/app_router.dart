@@ -71,8 +71,8 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 StatefulShellBranch _branch(String path, Widget screen) => StatefulShellBranch(
-      routes: [GoRoute(path: path, builder: (_, _) => screen)],
-    );
+  routes: [GoRoute(path: path, builder: (_, _) => screen)],
+);
 
 class _EditReportRoute extends ConsumerWidget {
   const _EditReportRoute({required this.incidentId});

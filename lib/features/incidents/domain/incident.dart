@@ -11,18 +11,18 @@ class TimelineEntry {
   final String note;
 
   factory TimelineEntry.fromMap(Map<String, dynamic> map) => TimelineEntry(
-        status: IncidentStatus.parse(map['status'] as String?),
-        actorName: map['actorName'] as String? ?? '',
-        at: (map['at'] as Timestamp?)?.toDate() ?? DateTime.now(),
-        note: map['note'] as String? ?? '',
-      );
+    status: IncidentStatus.parse(map['status'] as String?),
+    actorName: map['actorName'] as String? ?? '',
+    at: (map['at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+    note: map['note'] as String? ?? '',
+  );
 
   Map<String, dynamic> toMap() => {
-        'status': status.name,
-        'actorName': actorName,
-        'at': Timestamp.fromDate(at),
-        'note': note,
-      };
+    'status': status.name,
+    'actorName': actorName,
+    'at': Timestamp.fromDate(at),
+    'note': note,
+  };
 }
 
 class IncidentDraft {
@@ -43,12 +43,12 @@ class IncidentDraft {
   final bool anonymous;
 
   Map<String, dynamic> toMap() => {
-        'title': title.trim(),
-        'description': description.trim(),
-        'location': location.trim(),
-        'category': category.name,
-        'severity': severity.name,
-      };
+    'title': title.trim(),
+    'description': description.trim(),
+    'location': location.trim(),
+    'category': category.name,
+    'severity': severity.name,
+  };
 }
 
 class Incident {

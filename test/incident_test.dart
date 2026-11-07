@@ -75,7 +75,13 @@ void main() {
   group('IncidentFilter', () {
     final items = [
       _incident(id: 'a', status: IncidentStatus.resolved),
-      _incident(id: 'b', title: 'Power cut', location: 'Library', category: IncidentCategory.electricity, reporterId: 'me'),
+      _incident(
+        id: 'b',
+        title: 'Power cut',
+        location: 'Library',
+        category: IncidentCategory.electricity,
+        reporterId: 'me',
+      ),
     ];
 
     List<String> ids(IncidentFilter filter) => filter.apply(items, 'me').map((item) => item.id).toList();

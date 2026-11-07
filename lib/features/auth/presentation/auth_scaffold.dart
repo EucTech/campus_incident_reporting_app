@@ -30,14 +30,15 @@ class AuthScaffold extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 32),
-              Text(title, style: context.text.displayMedium)
-                  .animate()
-                  .fadeIn(duration: 350.ms)
-                  .slideY(begin: 0.2, curve: Curves.easeOutCubic),
+              Text(
+                title,
+                style: context.text.displayMedium,
+              ).animate().fadeIn(duration: 350.ms).slideY(begin: 0.2, curve: Curves.easeOutCubic),
               const SizedBox(height: 10),
-              Text(subtitle, style: context.text.bodyLarge?.copyWith(color: context.palette.muted))
-                  .animate()
-                  .fadeIn(delay: 80.ms, duration: 350.ms),
+              Text(
+                subtitle,
+                style: context.text.bodyLarge?.copyWith(color: context.palette.muted),
+              ).animate().fadeIn(delay: 80.ms, duration: 350.ms),
               const SizedBox(height: 32),
               ...children
                   .animate(interval: 60.ms, delay: 120.ms)

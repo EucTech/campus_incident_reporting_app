@@ -62,10 +62,7 @@ class PillButton extends StatelessWidget {
                     key: const ValueKey('label'),
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (icon != null) ...[
-                        Icon(icon, size: 19, color: foreground),
-                        const SizedBox(width: 8),
-                      ],
+                      if (icon != null) ...[Icon(icon, size: 19, color: foreground), const SizedBox(width: 8)],
                       Flexible(
                         child: Text(
                           label,

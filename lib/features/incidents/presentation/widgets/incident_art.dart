@@ -43,7 +43,9 @@ class _CategoryArt extends StatelessWidget {
       painter: _RingsPainter(p.line),
       child: ColoredBox(
         color: p.raised.withValues(alpha: 0.55),
-        child: Center(child: Icon(incident.category.icon, size: iconSize, color: p.ink)),
+        child: Center(
+          child: Icon(incident.category.icon, size: iconSize, color: p.ink),
+        ),
       ),
     );
   }

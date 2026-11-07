@@ -24,10 +24,7 @@ class IncidentCard extends StatelessWidget {
       scale: 0.98,
       child: Container(
         padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: p.surface,
-          borderRadius: BorderRadius.circular(AppRadius.card),
-        ),
+        decoration: BoxDecoration(color: p.surface, borderRadius: BorderRadius.circular(AppRadius.card)),
         child: Row(
           children: [
             ClipRRect(
@@ -39,12 +36,7 @@ class IncidentCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    incident.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.text.titleMedium,
-                  ),
+                  Text(incident.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: context.text.titleMedium),
                   const SizedBox(height: 4),
                   Text(
                     '${incident.location} · ${TimeFormat.relative(incident.createdAt)}',
@@ -59,8 +51,7 @@ class IncidentCard extends StatelessWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       StatusChip(status: incident.status),
-                      if (incident.severity == IncidentSeverity.high && incident.status.isOpen)
-                        const UrgentTag(),
+                      if (incident.severity == IncidentSeverity.high && incident.status.isOpen) const UrgentTag(),
                     ],
                   ),
                 ],
@@ -104,7 +95,11 @@ class FeatureCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Positioned(top: 12, left: 12, child: _ChipOnImage(incident: incident, canvas: p.canvas)),
+              Positioned(
+                top: 12,
+                left: 12,
+                child: _ChipOnImage(incident: incident, canvas: p.canvas),
+              ),
               Positioned(
                 left: 16,
                 right: 16,

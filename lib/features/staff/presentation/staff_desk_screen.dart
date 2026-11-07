@@ -52,10 +52,8 @@ class StaffDeskScreen extends ConsumerWidget {
           const SizedBox(height: 20),
           queue.when(
             loading: () => const SkeletonList(),
-            error: (error, _) => ErrorView(
-              message: friendlyError(error),
-              onRetry: () => ref.invalidate(incidentsProvider),
-            ),
+            error: (error, _) =>
+                ErrorView(message: friendlyError(error), onRetry: () => ref.invalidate(incidentsProvider)),
             data: (incidents) => incidents.isEmpty
                 ? EmptyView(title: 'Queue clear', message: 'No reports are ${selected.label.toLowerCase()}.')
                 : Column(

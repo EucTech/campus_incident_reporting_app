@@ -72,13 +72,8 @@ class SkeletonList extends StatelessWidget {
           Container(
             height: height,
             margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              color: p.surface,
-              borderRadius: BorderRadius.circular(AppRadius.card),
-            ),
-          )
-              .animate(onPlay: (controller) => controller.repeat())
-              .shimmer(duration: 1400.ms, color: p.raised),
+            decoration: BoxDecoration(color: p.surface, borderRadius: BorderRadius.circular(AppRadius.card)),
+          ).animate(onPlay: (controller) => controller.repeat()).shimmer(duration: 1400.ms, color: p.raised),
       ],
     );
   }
