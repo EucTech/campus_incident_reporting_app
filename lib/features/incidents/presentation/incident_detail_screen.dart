@@ -15,6 +15,7 @@ import '../domain/incident.dart';
 import '../domain/incident_enums.dart';
 import 'widgets/category_visuals.dart';
 import 'widgets/incident_art.dart';
+import 'widgets/photo_viewer.dart';
 import 'widgets/status_sheet.dart';
 import 'widgets/status_track.dart';
 
@@ -105,7 +106,16 @@ class _DetailBody extends ConsumerWidget {
                         width: double.infinity,
                         child: ClipRRect(
                           borderRadius: const BorderRadius.vertical(bottom: Radius.circular(AppRadius.card + 6)),
-                          child: IncidentArt(incident: incident, iconSize: 72),
+                          child: GestureDetector(
+                            onTap: incident.imageUrl == null
+                                ? null
+                                : () => openPhotoViewer(
+                                    context,
+                                    url: incident.imageUrl!,
+                                    heroTag: 'incident-art-${incident.id}',
+                                  ),
+                            child: IncidentArt(incident: incident, iconSize: 72),
+                          ),
                         ),
                       ),
                       Positioned(
