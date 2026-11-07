@@ -55,6 +55,7 @@ final filteredIncidentsProvider = Provider<AsyncValue<List<Incident>>>((ref) {
 
 class CampusStats {
   const CampusStats({
+    this.total = 0,
     this.open = 0,
     this.urgent = 0,
     this.resolved = 0,
@@ -63,6 +64,7 @@ class CampusStats {
     this.mineResolved = 0,
   });
 
+  final int total;
   final int open;
   final int urgent;
   final int resolved;
@@ -77,6 +79,7 @@ final campusStatsProvider = Provider<CampusStats>((ref) {
   final mine = incidents.where((incident) => incident.isOwnedBy(uid));
   final open = incidents.where((incident) => incident.status.isOpen);
   return CampusStats(
+    total: incidents.length,
     open: open.length,
     urgent: open.where((incident) => incident.severity == IncidentSeverity.high).length,
     resolved: incidents.where((incident) => incident.status == IncidentStatus.resolved).length,

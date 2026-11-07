@@ -54,13 +54,23 @@ class HomeScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(
-                child: _StatTile(value: stats.mine, label: 'My reports', onTap: () => _openMine(context, ref)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _StatTile(value: stats.mineOpen, label: 'Still open', onTap: () => _openMine(context, ref)),
-              ),
+              if (profile?.isStaff ?? false) ...[
+                Expanded(
+                  child: _StatTile(value: stats.total, label: 'Campus reports', onTap: () => _openAll(context, ref)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _StatTile(value: stats.open, label: 'Still open', onTap: () => _openAll(context, ref)),
+                ),
+              ] else ...[
+                Expanded(
+                  child: _StatTile(value: stats.mine, label: 'My reports', onTap: () => _openMine(context, ref)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _StatTile(value: stats.mineOpen, label: 'Still open', onTap: () => _openMine(context, ref)),
+                ),
+              ],
               const SizedBox(width: 12),
               Expanded(
                 child: _StatTile(
@@ -119,6 +129,11 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  void _openAll(BuildContext context, WidgetRef ref) {
+    ref.read(incidentFilterProvider.notifier).clear();
+    context.go('/reports');
   }
 
   void _openMine(BuildContext context, WidgetRef ref) {
