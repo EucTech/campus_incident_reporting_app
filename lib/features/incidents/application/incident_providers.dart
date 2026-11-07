@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/services/image_uploader.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../auth/domain/app_user.dart';
 import '../data/incident_repository.dart';
@@ -12,7 +12,7 @@ import '../domain/incident_enums.dart';
 import '../domain/incident_filter.dart';
 
 final incidentRepositoryProvider = Provider<IncidentRepository>(
-  (ref) => IncidentRepository(FirebaseFirestore.instance, FirebaseStorage.instance),
+  (ref) => IncidentRepository(FirebaseFirestore.instance, ref.watch(imageUploaderProvider)),
 );
 
 final incidentsProvider = StreamProvider<List<Incident>>((ref) {
@@ -29,9 +29,7 @@ final incidentByIdProvider = Provider.family<AsyncValue<Incident?>, String>((ref
   });
 });
 
-final incidentFilterProvider = NotifierProvider<IncidentFilterController, IncidentFilter>(
-  IncidentFilterController.new,
-);
+final incidentFilterProvider = NotifierProvider<IncidentFilterController, IncidentFilter>(IncidentFilterController.new);
 
 class IncidentFilterController extends Notifier<IncidentFilter> {
   @override
@@ -95,9 +93,9 @@ class DeskStatusController extends Notifier<IncidentStatus> {
 
 final deskQueueProvider = Provider<AsyncValue<List<Incident>>>((ref) {
   final status = ref.watch(deskStatusProvider);
-  return ref.watch(incidentsProvider).whenData(
-        (incidents) => staffQueue(incidents.where((incident) => incident.status == status).toList()),
-      );
+  return ref
+      .watch(incidentsProvider)
+      .whenData((incidents) => staffQueue(incidents.where((incident) => incident.status == status).toList()));
 });
 
 final incidentControllerProvider = AsyncNotifierProvider<IncidentController, void>(IncidentController.new);
@@ -128,26 +126,15 @@ class IncidentController extends AsyncNotifier<void> {
     return done ? id : null;
   }
 
-  Future<bool> edit(Incident incident, IncidentDraft draft, File? photo, {bool removePhoto = false}) => _run(
-        () => _repository.update(incident: incident, draft: draft, photo: photo, removePhoto: removePhoto),
-      );
+  Future<bool> edit(Incident incident, IncidentDraft draft, File? photo, {bool removePhoto = false}) =>
+      _run(() => _repository.update(incident: incident, draft: draft, photo: photo, removePhoto: removePhoto));
 
   Future<bool> remove(Incident incident) => _run(() => _repository.delete(incident));
 
-  Future<bool> setAffected(Incident incident, bool affected) => _run(
-        () => _repository.setAffected(
-          incidentId: incident.id,
-          uid: _requireProfile().uid,
-          affected: affected,
-        ),
-      );
+  Future<bool> setAffected(Incident incident, bool affected) =>
+      _run(() => _repository.setAffected(incidentId: incident.id, uid: _requireProfile().uid, affected: affected));
 
   Future<bool> changeStatus(Incident incident, IncidentStatus status, String note) => _run(
-        () => _repository.changeStatus(
-          incident: incident,
-          status: status,
-          note: note,
-          actorName: _requireProfile().name,
-        ),
-      );
+    () => _repository.changeStatus(incident: incident, status: status, note: note, actorName: _requireProfile().name),
+  );
 }

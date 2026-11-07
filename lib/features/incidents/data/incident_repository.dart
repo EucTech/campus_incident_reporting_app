@@ -1,17 +1,17 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
+import '../../../core/services/image_uploader.dart';
 import '../../auth/domain/app_user.dart';
 import '../domain/incident.dart';
 import '../domain/incident_enums.dart';
 
 class IncidentRepository {
-  IncidentRepository(this._db, this._storage);
+  IncidentRepository(this._db, this._uploader);
 
   final FirebaseFirestore _db;
-  final FirebaseStorage _storage;
+  final ImageUploader _uploader;
 
   static const _feedLimit = 300;
 
@@ -23,21 +23,9 @@ class IncidentRepository {
       .snapshots()
       .map((snapshot) => snapshot.docs.map((doc) => Incident.fromMap(doc.id, doc.data())).toList());
 
-  Future<({String url, String path})> _upload(String uid, String incidentId, File photo) async {
-    final path = 'incidents/$uid/$incidentId-${DateTime.now().millisecondsSinceEpoch}.jpg';
-    final reference = _storage.ref(path);
-    await reference.putFile(photo, SettableMetadata(contentType: 'image/jpeg'));
-    return (url: await reference.getDownloadURL(), path: path);
-  }
-
-  Future<void> _deletePhoto(String? path) async {
-    if (path == null) return;
-    await _storage.ref(path).delete().catchError((Object _) {});
-  }
-
   Future<String> create({required IncidentDraft draft, required AppUser reporter, File? photo}) async {
     final doc = _incidents.doc();
-    final image = photo == null ? null : await _upload(reporter.uid, doc.id, photo);
+    final image = photo == null ? null : await _uploader.upload(photo);
     final displayName = draft.anonymous ? null : reporter.name;
     await doc.set({
       ...draft.toMap(),
@@ -45,7 +33,7 @@ class IncidentRepository {
       'reporterId': reporter.uid,
       'reporterName': displayName,
       'imageUrl': image?.url,
-      'imagePath': image?.path,
+      'imagePath': image?.id,
       'affectedBy': <String>[],
       'timeline': [
         TimelineEntry(
@@ -67,20 +55,17 @@ class IncidentRepository {
     bool removePhoto = false,
   }) async {
     final replacesPhoto = photo != null || removePhoto;
-    final image = photo == null ? null : await _upload(incident.reporterId, incident.id, photo);
+    final image = photo == null ? null : await _uploader.upload(photo);
     await _incidents.doc(incident.id).update({
       ...draft.toMap(),
       if (replacesPhoto) 'imageUrl': image?.url,
-      if (replacesPhoto) 'imagePath': image?.path,
+      if (replacesPhoto) 'imagePath': image?.id,
       'updatedAt': FieldValue.serverTimestamp(),
     });
-    if (replacesPhoto) await _deletePhoto(incident.imagePath);
   }
 
-  Future<void> delete(Incident incident) async {
-    await _incidents.doc(incident.id).delete();
-    await _deletePhoto(incident.imagePath);
-  }
+  // Photos stay in Cloudinary because unsigned clients are not allowed to delete them.
+  Future<void> delete(Incident incident) => _incidents.doc(incident.id).delete();
 
   Future<void> setAffected({required String incidentId, required String uid, required bool affected}) =>
       _incidents.doc(incidentId).update({
@@ -92,12 +77,11 @@ class IncidentRepository {
     required IncidentStatus status,
     required String note,
     required String actorName,
-  }) =>
-      _incidents.doc(incident.id).update({
-        'status': status.name,
-        'timeline': FieldValue.arrayUnion([
-          TimelineEntry(status: status, actorName: actorName, at: DateTime.now(), note: note.trim()).toMap(),
-        ]),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+  }) => _incidents.doc(incident.id).update({
+    'status': status.name,
+    'timeline': FieldValue.arrayUnion([
+      TimelineEntry(status: status, actorName: actorName, at: DateTime.now(), note: note.trim()).toMap(),
+    ]),
+    'updatedAt': FieldValue.serverTimestamp(),
+  });
 }

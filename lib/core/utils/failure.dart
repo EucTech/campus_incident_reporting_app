@@ -1,16 +1,20 @@
 import 'package:firebase_core/firebase_core.dart';
 
+import '../services/image_uploader.dart';
+
 String friendlyError(Object error) {
   if (error is NotAluEmail) return error.message;
   if (error is AccountDeleted) return error.message;
+  if (error is ImageUploadFailed) return error.message;
   if (error is! FirebaseException) return 'Something went wrong. Please try again.';
   return switch (error.code) {
-    'invalid-credential' || 'wrong-password' || 'user-not-found' || 'invalid-login-credentials' =>
-      'That email and password do not match.',
+    'invalid-credential' ||
+    'wrong-password' ||
+    'user-not-found' ||
+    'invalid-login-credentials' => 'That email and password do not match.',
     'email-already-in-use' => 'An account already exists for this email. Try logging in.',
     'weak-password' => 'Choose a stronger password.',
-    'user-token-expired' || 'requires-recent-login' || 'user-mismatch' =>
-      'Your session expired. Log in again.',
+    'user-token-expired' || 'requires-recent-login' || 'user-mismatch' => 'Your session expired. Log in again.',
     'invalid-email' => 'That email address is not valid.',
     'too-many-requests' => 'Too many attempts. Wait a moment and try again.',
     'user-disabled' => 'This account has been disabled.',
