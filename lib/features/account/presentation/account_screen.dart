@@ -22,6 +22,7 @@ class AccountScreen extends ConsumerWidget {
     final p = context.palette;
     final profile = ref.watch(profileProvider).value;
     final stats = ref.watch(campusStatsProvider);
+    final seesCampus = profile?.isStaff ?? false;
     final schoolName = ref.watch(currentSchoolProvider).value?.name ?? 'your school';
 
     return SafeArea(
@@ -70,18 +71,22 @@ class AccountScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
+          if (seesCampus) ...[
+            Text('Across $schoolName', style: context.text.labelMedium?.copyWith(color: p.muted)),
+            const SizedBox(height: 8),
+          ],
           Row(
             children: [
               Expanded(
-                child: _Stat(value: stats.mine, label: 'Reported'),
+                child: _Stat(value: seesCampus ? stats.total : stats.mine, label: 'Reported'),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _Stat(value: stats.mineOpen, label: 'Open'),
+                child: _Stat(value: seesCampus ? stats.open : stats.mineOpen, label: 'Open'),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _Stat(value: stats.mineResolved, label: 'Resolved'),
+                child: _Stat(value: seesCampus ? stats.resolved : stats.mineResolved, label: 'Resolved'),
               ),
             ],
           ),
