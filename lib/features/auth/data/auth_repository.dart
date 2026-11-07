@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/services/image_uploader.dart';
 import '../../../core/utils/failure.dart';
-import '../../../core/utils/validators.dart';
 import '../domain/app_user.dart';
 
 class AuthRepository {
@@ -19,47 +18,56 @@ class AuthRepository {
 
   Stream<User?> userChanges() => _auth.userChanges();
 
+  Stream<bool> verifiedTokenChanges() => _auth.idTokenChanges().asyncMap(
+    (user) async => user != null && (await user.getIdTokenResult()).claims?['email_verified'] == true,
+  );
+
   Stream<AppUser?> watchProfile(String uid) =>
       _userDoc(uid).snapshots().map((snapshot) => snapshot.exists ? AppUser.fromMap(uid, snapshot.data()!) : null);
 
-  Future<void> register({required String name, required String email, required String password}) async {
-    if (!Validators.isAluEmail(email)) throw const NotAluEmail();
+  Future<User> createAccount({required String name, required String email, required String password}) async {
     final credential = await _auth.createUserWithEmailAndPassword(email: email.trim(), password: password);
     final user = credential.user!;
     await user.updateDisplayName(name.trim());
-    await _createProfile(user, name.trim());
-    await user.sendEmailVerification();
+    return user;
   }
 
+  Future<void> createProfile(User user, String name) => _userDoc(user.uid).set({
+    'name': name.trim(),
+    'email': user.email!.toLowerCase(),
+    'role': UserRole.none.name,
+    'schoolId': null,
+    'createdAt': FieldValue.serverTimestamp(),
+  });
+
+  Future<void> discardNewAccount() async => _auth.currentUser?.delete();
+
+  Future<void> sendVerification() async => _auth.currentUser?.sendEmailVerification();
+
   Future<void> signIn({required String email, required String password}) async {
-    if (!Validators.isAluEmail(email)) throw const NotAluEmail();
     final credential = await _auth.signInWithEmailAndPassword(email: email.trim(), password: password);
     final user = credential.user!;
     final profile = await _userDoc(user.uid).get();
     if (!profile.exists) {
-      await _createProfile(user, user.displayName ?? 'ALU member');
+      await createProfile(user, user.displayName ?? 'Pulse member');
       return;
     }
     if (profile.data()?['deletedAt'] != null) {
       await _auth.signOut();
       throw const AccountDeleted();
     }
-    if (profile.data()?['email'] != user.email) await _userDoc(user.uid).update({'email': user.email});
+    final currentEmail = user.email!.toLowerCase();
+    if (profile.data()?['email'] != currentEmail) await _userDoc(user.uid).update({'email': currentEmail});
   }
 
-  Future<void> _createProfile(User user, String name) => _userDoc(
-    user.uid,
-  ).set({'name': name, 'email': user.email, 'role': UserRole.student.name, 'createdAt': FieldValue.serverTimestamp()});
-
-  Future<void> resendVerification() async => _auth.currentUser?.sendEmailVerification();
-
-  // The token refreshes before reload so Firestore sees the verified claim first.
+  // Firestore only trusts the token, so a fresh one is issued once the account reports verified.
   Future<bool> refreshVerification() async {
     final user = _auth.currentUser;
     if (user == null) return false;
-    await user.getIdToken(true);
     await user.reload();
-    return _auth.currentUser?.emailVerified ?? false;
+    final verified = _auth.currentUser?.emailVerified ?? false;
+    if (verified) await _auth.currentUser?.getIdToken(true);
+    return verified;
   }
 
   Future<void> updateProfile({
@@ -88,7 +96,6 @@ class AuthRepository {
   }
 
   Future<void> requestEmailChange({required String newEmail, required String password}) async {
-    if (!Validators.isAluEmail(newEmail)) throw const NotAluEmail();
     final user = await _confirmPassword(password);
     await user.verifyBeforeUpdateEmail(newEmail.trim());
   }

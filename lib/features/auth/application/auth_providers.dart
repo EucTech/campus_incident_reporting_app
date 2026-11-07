@@ -5,10 +5,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/services/image_uploader.dart';
+import '../../../core/utils/failure.dart';
+import '../../../core/utils/validators.dart';
 import '../data/auth_repository.dart';
 import '../domain/app_user.dart';
-
-enum AuthStage { loading, signedOut, unverified, ready }
 
 final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => AuthRepository(FirebaseAuth.instance, FirebaseFirestore.instance, ref.watch(imageUploaderProvider)),
@@ -16,13 +16,7 @@ final authRepositoryProvider = Provider<AuthRepository>(
 
 final authUserProvider = StreamProvider<User?>((ref) => ref.watch(authRepositoryProvider).userChanges());
 
-final authStageProvider = Provider<AuthStage>((ref) {
-  final auth = ref.watch(authUserProvider);
-  if (!auth.hasValue) return AuthStage.loading;
-  final user = auth.value;
-  if (user == null) return AuthStage.signedOut;
-  return user.emailVerified ? AuthStage.ready : AuthStage.unverified;
-});
+final verifiedTokenProvider = StreamProvider<bool>((ref) => ref.watch(authRepositoryProvider).verifiedTokenChanges());
 
 final currentUidProvider = Provider<String?>((ref) => ref.watch(authUserProvider).value?.uid);
 
@@ -33,6 +27,8 @@ final profileProvider = StreamProvider<AppUser?>((ref) {
 });
 
 final isStaffProvider = Provider<bool>((ref) => ref.watch(profileProvider).value?.isStaff ?? false);
+
+final isAdminProvider = Provider<bool>((ref) => ref.watch(profileProvider).value?.isAdmin ?? false);
 
 final authControllerProvider = AsyncNotifierProvider<AuthController, void>(AuthController.new);
 
@@ -53,12 +49,9 @@ class AuthController extends AsyncNotifier<void> {
   Future<bool> signIn(String email, String password) =>
       _run(() => _repository.signIn(email: email, password: password));
 
-  Future<bool> register(String name, String email, String password) =>
-      _run(() => _repository.register(name: name, email: email, password: password));
-
   Future<bool> sendPasswordReset(String email) => _run(() => _repository.sendPasswordReset(email));
 
-  Future<bool> resendVerification() => _run(_repository.resendVerification);
+  Future<bool> resendVerification() => _run(_repository.sendVerification);
 
   Future<bool> updateProfile({required String name, File? photo, bool removePhoto = false}) => _run(
     () => _repository.updateProfile(
@@ -69,8 +62,12 @@ class AuthController extends AsyncNotifier<void> {
     ),
   );
 
-  Future<bool> requestEmailChange(String email, String password) =>
-      _run(() => _repository.requestEmailChange(newEmail: email, password: password));
+  Future<bool> requestEmailChange(String email, String password) => _run(() async {
+    final profile = ref.read(profileProvider).value!;
+    final keepsDomain = Validators.emailDomain(email) == Validators.emailDomain(profile.email);
+    if (profile.role == UserRole.student && !keepsDomain) throw const SchoolEmailRequired();
+    await _repository.requestEmailChange(newEmail: email, password: password);
+  });
 
   Future<bool> changePassword(String current, String next) =>
       _run(() => _repository.changePassword(current: current, next: next));
